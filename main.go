@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	"./signature"
 )
 
 func ping(BASEURL string) {
@@ -21,8 +23,7 @@ func ping(BASEURL string) {
 }
 
 func main() {
-	//BASEURL := "https://api.binance.com"
-	//ping(BASEURL)
-	fmt.Println(TestValid())
+	context := "symbol=LTCBTC&side=BUY&type=LIMIT&timeInForce=GTC&quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559"
+	signature.GetSignature(context)
 
 }

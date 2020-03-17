@@ -4,16 +4,36 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
+	"io/ioutil"
+	"log"
+
+	"gopkg.in/yaml.v2"
 )
 
-//GetSignature : for encrypt signature
-func GetSignature(context string) string {
-	secretKey := "NhqPtmdSJYdKjVHjA7PZj4Mge3R5YNiP1e3UZjInClVN65XAbvqqM6A7H5fATj0j"
-	// apiKey := "vmPUZE6mv9SD5VNHk4HlWFsOr6aKE2zvsw0MuIgwCIPy6utIco14y7Ju91duEh8A"
-	// stdin := "c8db56825ae71d6d79447849e617115f4a920fa2acdcab2b053c4b2838bd6b71"
+//Conf configuration structure
+type conf struct {
+	APIKey        string `yaml:"api_key"`
+	SecretKey     string `yaml:"api_secret"`
+	APIKeyTest    string `yaml:"apiKey"`
+	SecretKeyTest string `yaml:"secretKey"`
+}
 
-	key := []byte(secretKey)
+//GetConf getter for getting configuration
+func (c *conf) getConf() {
+	yamlFile, err := ioutil.ReadFile("./signature/conf.yml")
+	if err != nil {
+		log.Println("Parsing conf.yml get err ", err)
+	}
+	yaml.Unmarshal(yamlFile, c)
+}
+
+//GetSignature : for encrypt signature
+func GetSignature(context string) {
+	c := conf{}
+	c.getConf()
+	key := []byte(c.SecretKey)
 	h := hmac.New(sha256.New, key)
 	h.Write([]byte(context))
-	return hex.EncodeToString(h.Sum(nil))
+	fmt.Println(hex.EncodeToString(h.Sum(nil)))
 }
