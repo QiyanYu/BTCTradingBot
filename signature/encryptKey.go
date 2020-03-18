@@ -4,7 +4,6 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 	"io/ioutil"
 	"log"
 
@@ -12,15 +11,15 @@ import (
 )
 
 //Conf configuration structure
-type conf struct {
-	APIKey        string `yaml:"api_key"`
-	SecretKey     string `yaml:"api_secret"`
-	APIKeyTest    string `yaml:"apiKey"`
-	SecretKeyTest string `yaml:"secretKey"`
+type Conf struct {
+	APIKey    string `yaml:"api_key"`
+	SecretKey string `yaml:"api_secret"`
+	// APIKeyTest    string `yaml:"apiKey"`
+	// SecretKeyTest string `yaml:"secretKey"`
 }
 
 //GetConf getter for getting configuration
-func (c *conf) getConf() {
+func (c *Conf) GetConf() {
 	yamlFile, err := ioutil.ReadFile("./signature/conf.yml")
 	if err != nil {
 		log.Println("Parsing conf.yml get err ", err)
@@ -29,11 +28,15 @@ func (c *conf) getConf() {
 }
 
 //GetSignature : for encrypt signature
-func GetSignature(context string) {
-	c := conf{}
-	c.getConf()
+func (c *Conf) GetSignature(context string) string {
+
 	key := []byte(c.SecretKey)
 	h := hmac.New(sha256.New, key)
 	h.Write([]byte(context))
-	fmt.Println(hex.EncodeToString(h.Sum(nil)))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+//GetAPIKey for getting API Key
+func (c *Conf) GetAPIKey() string {
+	return c.APIKey
 }
