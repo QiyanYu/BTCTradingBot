@@ -8,26 +8,12 @@ import (
 	"strconv"
 	"time"
 
+	"./request"
 	"./signature"
 )
 
-func ping() {
-	BASEURL := "https://api.binance.com"
-	// pingURL := "/api/v3/ping"
-	// systemURL := "/wapi/v3/systemStatus.html"
-	systemURL := "/api/v3/time"
-	resp, err := http.Get(BASEURL + systemURL)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(string(body))
-	fmt.Println(time.Now().UnixNano() / 1e6)
-}
+var baseURL = "https://api.binance.com"
+
 func getTime() string {
 	// timenow := time.Now().Unix()
 	time := time.Now().UnixNano() / 1e6
@@ -37,16 +23,15 @@ func getTime() string {
 }
 
 func main() {
-	BASEURL := "https://api.binance.com"
 
 	c := signature.Conf{}
 	c.GetConf()
 
-	url := BASEURL + "/sapi/v1/accountSnapshot?"
+	url := baseURL + "/sapi/v1/accountSnapshot?"
 	time := getTime()
 	fmt.Println(time)
 	//since the server unix time is faster than mine, increased the recvWindow
-	allCoinContext := "type=SPOT&recvWindow=25000&limit=5&timestamp=" + time
+	allCoinContext := "type=SPOT&recvWindow=50000&limit=5&timestamp=" + time
 	urlAllCoin := url + allCoinContext + "&signature=" + c.GetSignature(allCoinContext)
 	fmt.Println(urlAllCoin)
 	req, err := http.NewRequest("GET", urlAllCoin, nil)
@@ -67,5 +52,7 @@ func main() {
 
 	fmt.Println(string(body))
 
-	ping()
+	request.Ping()
+	fmt.Println(request.GetSymbolPriceTicker("BTCUSDT"))
+	request.WSLiveSubscribe()
 }
